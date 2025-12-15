@@ -86,12 +86,16 @@ const Quizzao = () => {
         mode: quizMode,
       });
 
-      const response = await axios.post('http://localhost:5000/generate-quiz', {
-        topic: selectedSubject.trim(),
-        difficulty: schoolLevel,
-        numberOfQuestions: quizLength,
-        mode: quizMode,
-      });
+      // Render backend
+      const response = await axios.post(
+        'https://quizzao-backend-real.onrender.com/generate-quiz',
+        {
+          topic: selectedSubject.trim(),
+          difficulty: schoolLevel,
+          numberOfQuestions: quizLength,
+          mode: quizMode,
+        }
+      );
 
       console.log('Received response:', response.data);
       setDynamicQuiz(response.data.questions || []);
@@ -105,7 +109,6 @@ const Quizzao = () => {
       setAiQuestion('');
       setAiAnswer('');
 
-      // start/stop stopwatch based on mode
       if (quizMode === 'competitive') {
         setElapsedMs(0);
         setIsRunning(true);
@@ -193,13 +196,17 @@ const Quizzao = () => {
     setAiLoading(true);
     setAiAnswer('');
     try {
-      const response = await axios.post('http://localhost:5000/ask-ai', {
-        topic: selectedSubject,
-        difficulty: schoolLevel,
-        mode: quizMode,
-        userQuestion: aiQuestion.trim(),
-        currentQuestionText: currentQ,
-      });
+      // Render backend
+      const response = await axios.post(
+        'https://quizzao-backend-real.onrender.com/ask-ai',
+        {
+          topic: selectedSubject,
+          difficulty: schoolLevel,
+          mode: quizMode,
+          userQuestion: aiQuestion.trim(),
+          currentQuestionText: currentQ,
+        }
+      );
 
       const answer =
         response.data?.answer ||
@@ -215,7 +222,6 @@ const Quizzao = () => {
     }
   };
 
-  // helper to format mm:ss from elapsedMs
   const formattedTime = new Date(elapsedMs).toISOString().substr(14, 5);
 
   return (
@@ -492,49 +498,56 @@ const Quizzao = () => {
                       <div>
                         {dynamicQuiz[currentQuestion] &&
                           dynamicQuiz[currentQuestion].options &&
-                          dynamicQuiz[currentQuestion].options.map((opt, idx) => {
-                            const question = dynamicQuiz[currentQuestion];
-                            const correct = question.correctAnswer;
+                          dynamicQuiz[currentQuestion].options.map(
+                            (opt, idx) => {
+                              const question =
+                                dynamicQuiz[currentQuestion];
+                              const correct = question.correctAnswer;
 
-                            let bg =
-                              theme === 'light' ? '#f0f0f0' : '#111827';
+                              let bg =
+                                theme === 'light' ? '#f0f0f0' : '#111827';
 
-                            if (showFeedback) {
-                              const isChosen = idx === selectedOptionIndex;
-                              const isCorrect =
-                                opt &&
-                                correct &&
-                                opt.trim().toLowerCase() ===
-                                  correct.trim().toLowerCase();
+                              if (showFeedback) {
+                                const isChosen = idx === selectedOptionIndex;
+                                const isCorrect =
+                                  opt &&
+                                  correct &&
+                                  opt.trim().toLowerCase() ===
+                                    correct.trim().toLowerCase();
 
-                              if (isChosen && isCorrect) bg = colors.correct;
-                              else if (isChosen && !isCorrect) bg = colors.wrong;
-                              else if (!isChosen && isCorrect) bg = colors.correct;
+                                if (isChosen && isCorrect) bg = colors.correct;
+                                else if (isChosen && !isCorrect)
+                                  bg = colors.wrong;
+                                else if (!isChosen && isCorrect)
+                                  bg = colors.correct;
+                              }
+
+                              return (
+                                <button
+                                  key={idx}
+                                  onClick={() =>
+                                    !showFeedback && handleQuizAnswer(idx)
+                                  }
+                                  style={{
+                                    display: 'block',
+                                    marginBottom: 10,
+                                    padding: 10,
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    cursor: showFeedback
+                                      ? 'default'
+                                      : 'pointer',
+                                    backgroundColor: bg,
+                                    color: colors.text,
+                                    border: `1px solid ${colors.border}`,
+                                    borderRadius: 6,
+                                  }}
+                                >
+                                  {opt}
+                                </button>
+                              );
                             }
-
-                            return (
-                              <button
-                                key={idx}
-                                onClick={() =>
-                                  !showFeedback && handleQuizAnswer(idx)
-                                }
-                                style={{
-                                  display: 'block',
-                                  marginBottom: 10,
-                                  padding: 10,
-                                  width: '100%',
-                                  textAlign: 'left',
-                                  cursor: showFeedback ? 'default' : 'pointer',
-                                  backgroundColor: bg,
-                                  color: colors.text,
-                                  border: `1px solid ${colors.border}`,
-                                  borderRadius: 6,
-                                }}
-                              >
-                                {opt}
-                              </button>
-                            );
-                          })}
+                          )}
                       </div>
 
                       {showFeedback && dynamicQuiz[currentQuestion] && (
@@ -548,7 +561,9 @@ const Quizzao = () => {
                           }}
                         >
                           <strong>Explanation:</strong>
-                          <div>{dynamicQuiz[currentQuestion].explanation}</div>
+                          <div>
+                            {dynamicQuiz[currentQuestion].explanation}
+                          </div>
                         </div>
                       )}
 
@@ -565,7 +580,9 @@ const Quizzao = () => {
                           style={{
                             padding: 8,
                             cursor:
-                              currentQuestion === 0 ? 'not-allowed' : 'pointer',
+                              currentQuestion === 0
+                                ? 'not-allowed'
+                                : 'pointer',
                             backgroundColor: colors.cardBg,
                             color: colors.text,
                             border: `1px solid ${colors.border}`,
