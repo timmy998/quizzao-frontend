@@ -313,7 +313,8 @@ const Quizzao = () => {
               onChange={(e) => setSelectedSubject(e.target.value)}
               style={{
                 padding: 8,
-                width: 300,
+                width: '100%',
+                maxWidth: 300,
                 marginBottom: 12,
                 backgroundColor:
                   theme === 'light' ? '#ffffff' : colors.cardBg,
