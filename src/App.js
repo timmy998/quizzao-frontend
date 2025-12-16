@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { marked } from 'marked';
 
+
 const Quizzao = () => {
   const [selectedOptionIndex, setSelectedOptionIndex] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -17,8 +18,10 @@ const Quizzao = () => {
   const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
 
+
   const [quizLength, setQuizLength] = useState(5); // 5,10,25
   const [quizMode, setQuizMode] = useState('casual'); // 'casual' or 'competitive'
+
 
   const [theme, setTheme] = useState('light'); // 'light' or 'dark'
   const themes = {
@@ -49,14 +52,17 @@ const Quizzao = () => {
   };
   const colors = themes[theme];
 
+
   // AI helper state
   const [aiQuestion, setAiQuestion] = useState('');
   const [aiAnswer, setAiAnswer] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
+
   // STOPWATCH EFFECT (competitive mode only)
   useEffect(() => {
     if (!isRunning || quizMode !== 'competitive') return;
+
 
     const start = performance.now() - elapsedMs;
     const id = setInterval(() => {
@@ -64,8 +70,10 @@ const Quizzao = () => {
       setElapsedMs(now - start);
     }, 100);
 
+
     return () => clearInterval(id);
   }, [isRunning, elapsedMs, quizMode]);
+
 
   const fetchQuizFromBackend = async () => {
     if (!selectedSubject || !selectedSubject.trim()) {
@@ -77,6 +85,7 @@ const Quizzao = () => {
       return;
     }
 
+
     setQuizLoading(true);
     try {
       console.log('Sending request:', {
@@ -85,6 +94,7 @@ const Quizzao = () => {
         numberOfQuestions: quizLength,
         mode: quizMode,
       });
+
 
       // Render backend
       const response = await axios.post(
@@ -97,6 +107,7 @@ const Quizzao = () => {
         }
       );
 
+
       console.log('Received response:', response.data);
       setDynamicQuiz(response.data.questions || []);
       setCurrentView('quiz');
@@ -108,6 +119,7 @@ const Quizzao = () => {
       setShowFeedback(false);
       setAiQuestion('');
       setAiAnswer('');
+
 
       if (quizMode === 'competitive') {
         setElapsedMs(0);
@@ -126,19 +138,24 @@ const Quizzao = () => {
     }
   };
 
+
   const handleQuizAnswer = (idx) => {
     const question = dynamicQuiz[currentQuestion];
     if (!question || !question.options) return;
 
+
     const chosen = question.options[idx];
     const correct = question.correctAnswer;
+
 
     setSelectedOptionIndex(idx);
     setShowFeedback(true);
 
+
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = idx;
     setAnswers(newAnswers);
+
 
     if (
       chosen &&
@@ -150,6 +167,7 @@ const Quizzao = () => {
       }
     }
   };
+
 
   const goToNextQuestion = () => {
     if (currentQuestion < dynamicQuiz.length - 1) {
@@ -163,6 +181,7 @@ const Quizzao = () => {
     }
   };
 
+
   const goToPreviousQuestion = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion((prev) => prev - 1);
@@ -171,6 +190,7 @@ const Quizzao = () => {
       setShowFeedback(prevIndex != null);
     }
   };
+
 
   const handleBackToHome = () => {
     setCurrentView('home');
@@ -187,11 +207,13 @@ const Quizzao = () => {
     setElapsedMs(0);
   };
 
+
   // AI ask handler calling backend
   const handleAskAI = async () => {
     if (!aiQuestion.trim()) return;
     const currentQ =
       dynamicQuiz[currentQuestion]?.question || selectedSubject || '';
+
 
     setAiLoading(true);
     setAiAnswer('');
@@ -208,6 +230,7 @@ const Quizzao = () => {
         }
       );
 
+
       const answer =
         response.data?.answer ||
         "I couldn't generate a detailed explanation right now. Please try again.";
@@ -222,7 +245,9 @@ const Quizzao = () => {
     }
   };
 
+
   const formattedTime = new Date(elapsedMs).toISOString().substr(14, 5);
+
 
   return (
     <div
@@ -267,6 +292,7 @@ const Quizzao = () => {
           </button>
         </header>
 
+
         {currentView === 'home' && (
           <div
             style={{
@@ -297,6 +323,7 @@ const Quizzao = () => {
               }}
             />
 
+
             <div style={{ marginTop: 12, marginBottom: 12, color: colors.text }}>
               <label>Difficulty: </label>
               <select
@@ -318,6 +345,7 @@ const Quizzao = () => {
               </select>
             </div>
 
+
             <div style={{ marginTop: 12, marginBottom: 12, color: colors.text }}>
               <label>Mode: </label>
               <select
@@ -336,6 +364,7 @@ const Quizzao = () => {
                 <option value="competitive">Competitive (with timer)</option>
               </select>
             </div>
+
 
             <div style={{ marginTop: 12, marginBottom: 12, color: colors.text }}>
               <label>Quiz length: </label>
@@ -356,6 +385,7 @@ const Quizzao = () => {
                 <option value={25}>25 questions</option>
               </select>
             </div>
+
 
             <div>
               <button
@@ -384,6 +414,7 @@ const Quizzao = () => {
           </div>
         )}
 
+
         {currentView === 'quiz' && (
           <div>
             {/* PROGRESS BAR */}
@@ -409,12 +440,9 @@ const Quizzao = () => {
               />
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                gap: 16,
-              }}
-            >
+
+            {/* FLEX LAYOUT WRAPPER - Changed to className for mobile responsiveness */}
+            <div className="quiz-layout">
               {/* LEFT: quiz card */}
               <div
                 style={{
@@ -445,6 +473,7 @@ const Quizzao = () => {
                   Exit quiz
                 </button>
 
+
                 {/* STOPWATCH DISPLAY (competitive only) */}
                 {quizMode === 'competitive' && (
                   <div
@@ -464,11 +493,13 @@ const Quizzao = () => {
                   </div>
                 )}
 
+
                 {quizLoading && (
                   <div style={{ fontSize: 18, color: colors.subText }}>
                     Loading quiz...
                   </div>
                 )}
+
 
                 {!quizLoading &&
                   dynamicQuiz &&
@@ -504,8 +535,10 @@ const Quizzao = () => {
                                 dynamicQuiz[currentQuestion];
                               const correct = question.correctAnswer;
 
+
                               let bg =
                                 theme === 'light' ? '#f0f0f0' : '#111827';
+
 
                               if (showFeedback) {
                                 const isChosen = idx === selectedOptionIndex;
@@ -515,12 +548,14 @@ const Quizzao = () => {
                                   opt.trim().toLowerCase() ===
                                     correct.trim().toLowerCase();
 
+
                                 if (isChosen && isCorrect) bg = colors.correct;
                                 else if (isChosen && !isCorrect)
                                   bg = colors.wrong;
                                 else if (!isChosen && isCorrect)
                                   bg = colors.correct;
                               }
+
 
                               return (
                                 <button
@@ -550,6 +585,7 @@ const Quizzao = () => {
                           )}
                       </div>
 
+
                       {showFeedback && dynamicQuiz[currentQuestion] && (
                         <div
                           style={{
@@ -566,6 +602,7 @@ const Quizzao = () => {
                           </div>
                         </div>
                       )}
+
 
                       <div
                         style={{
@@ -612,6 +649,7 @@ const Quizzao = () => {
                     </div>
                   )}
 
+
                 {!quizLoading && dynamicQuiz && dynamicQuiz.length === 0 && (
                   <div style={{ fontSize: 16, color: colors.subText }}>
                     No questions available. Go back and try another topic.
@@ -632,6 +670,7 @@ const Quizzao = () => {
                     </button>
                   </div>
                 )}
+
 
                 {showResults && (
                   <div style={{ marginTop: 24 }}>
@@ -660,6 +699,7 @@ const Quizzao = () => {
                   </div>
                 )}
               </div>
+
 
               {/* RIGHT: AI helper panel (casual only) */}
               {quizMode === 'casual' && (
@@ -747,5 +787,6 @@ const Quizzao = () => {
     </div>
   );
 };
+
 
 export default Quizzao;

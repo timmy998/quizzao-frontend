@@ -28,6 +28,19 @@
   color: #61dafb;
 }
 
+/* Phones: Stack quiz cards vertically */
+.quiz-layout {
+  display: flex;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .quiz-layout {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
